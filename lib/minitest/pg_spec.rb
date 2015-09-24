@@ -1,5 +1,6 @@
 require 'active_record'
-class Minitest::Spec
+
+class Minitest::Test
   class SQLRunner
 
     def initialize(sql, a, b=nil)
@@ -19,13 +20,19 @@ class Minitest::Spec
     end
 
     def msg(&block)
-      proc {
-        "#{sql}\n#{block.call}"
-      }
+      proc {"#{sql}\n#{block.call(self)}"}
     end
+
 
     def test
       "t" == get_first(sql)
+    end
+
+    def run
+      this = self
+       Minitest::Spec.it do
+        assert(this.test, this.msg )
+       end
     end
 
     private
@@ -34,56 +41,70 @@ class Minitest::Spec
     end
   end
 
+  def initialize(*args)
+    @regress = []
+    super
+  end
+
+  def regress
+    @regress
+  end
+
   class << self
-
-
-    def cmp a, op, b, desc=nil
+    def sql_test(sql, a, b=nil, desc = nil,  &block)
       it desc do
-        r = SQLRunner.new("SELECT #{a} #{op} #{b}", a, b)
-        assert(r.test, r.msg{"Expected #{r.ea} to be #{op} #{r.eb}"} )
+        r = SQLRunner.new(sql, a, b)
+        self.regress<<sql
+        assert(r.test, proc {"#{r.sql}\n#{block.call(self,r)}"})
       end
     end
 
-    def is a, b
-      it desc do
-        r = SQLRunner.new("SELECT #{a} = #{b}", a, b)
-        assert(r.test, r.msg{ diff r.eb, r.ea })
+    def cmp a, op, b, desc = nil
+      sql_test "SELECT #{a} #{op} #{b}", a, b, desc do |a,r|
+        "Expected #{r.ea} to be #{op} #{r.eb}"
       end
     end
 
-    def isnt a, b
-      it desc do
-        r = SQLRunner.new("SELECT #{a} <> #{b}", a, b)
-        assert(r.test, r.msg{ "Expected #{r.ea} to not be equal to #{r.eb}"})
+    def is a, b, desc = nil
+      sql_test("SELECT #{a} = #{b}", a, b, desc) do |a,r|
+        a.diff r.eb, r.ea
       end
     end
 
-    def matches a, b
-      it desc do
-        r = SQLRunner.new("SELECT #{a} ~ #{b}", a, b)
-        assert(r.test, r.msg{ "Expected #{r.ea} to match #{r.eb}"})
+    def isnt a, b, desc = nil
+      sql_test("SELECT #{a} <> #{b}", a, b, desc) do |a,r|
+        "Expected #{r.ea} to <> #{r.eb}"
       end
     end
 
-    def imatches a, b
-      it desc do
-        r = SQLRunner.new("SELECT #{a} ~* #{b}", a, b)
-        assert(r.test, r.msg{ "Expected #{r.ea} to match #{r.eb}"})
+    def output(a, b, desc = nil)
+      sql_test("SELECT #{a}", a, b, desc) do |a,r|
+        "Expected #{r.ea} to output #{b}\n#{a.diff r.ea, b}"
       end
     end
 
-    def isa a, b
-      it desc do
-        r = SQLRunner.new("SELECT pg_typeof(#{a}) = #{b}::regtype", "pg_typeof(#{a})", "#{b}::regtype")
-        assert(r.test, r.msg{ "Expected #{a} to be of type #{b}\n #{diff r.eb, r.ea}"})
+    def matches a, b, desc = nil
+      sql_test("SELECT #{a} ~ #{b}", a, b, desc ) do |a,r|
+        "Expected #{r.ea} to match #{r.eb}"
+      end
+    end
+
+    def imatches a, b, desc = nil
+      sql_test("SELECT #{a} ~* #{b}", a, b) do |a,r|
+        "Expected #{r.ea} to match #{r.eb}"
+      end
+    end
+
+    def isa a, b, desc = nil
+      sql_test("SELECT pg_typeof(#{a}) = #{b}::regtype", "pg_typeof(#{a})", "#{b}::regtype",  desc) do |a,r|
+        "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
       end
     end
 
 
-    def ok a,desc=nil
-      it desc do
-        r = SQLRunner.new("SELECT #{a}", a)
-        assert(r.test)
+    def ok a, desc=nil
+      sql_test("SELECT #{a}", a, nil, desc) do |a,r|
+        a.diff 't', r.ea
       end
     end
   end

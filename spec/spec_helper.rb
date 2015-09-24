@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'pg_spec'
+require "minitest/reporters"
 
 ENV['PGSPEC_ENV']  ||= 'test'
 require File.expand_path('../../config/boot', __FILE__)
