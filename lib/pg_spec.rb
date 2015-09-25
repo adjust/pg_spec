@@ -4,32 +4,36 @@ module PgSpec
   autoload :SQLTest, 'pg_spec/sql_test'
 
   def self.included(base)
+    cl = caller_locations(1,1).first
+    p = Pathname.new cl.path
+    base.class_variable_set :@@logfile_name, p.basename.sub_ext('.sql').sub('_spec','_test')
     base.extend(ClassMethods)
   end
 
-
-  def initialize(*args)
-    @regress = []
-    super
+  def before_setup
+    SQLTest.class_variable_set :@@logfile_name, self.class.class_variable_get(:@@logfile_name)
   end
 
-  def regress
-    @regress
-  end
 
   module ClassMethods
     def sql_true(sql, a, b = nil, desc = nil,  &block)
+      transaction = true if self.class_variable_defined? :@@transaction
+      cl = caller_locations(2,1).first
+      loc = Pathname.new(cl.absolute_path).relative_path_from(SQLTest.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, a, b)
-        self.regress<<sql
+        r.log("--#{loc}")
+        r.log("-- #{desc}") if desc
+        r.execute "BEGIN" if transaction
         assert(r.test('t'), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        r.execute "ROLLBACK" if transaction
       end
     end
 
     def sql_cmp_out(sql, a, b = nil, desc = nil,  &block)
       it desc do
         r = SQLTest.new(sql, a, b)
-        self.regress<<sql
+        r.log("-- #{desc}") if desc
         assert(r.test(b), proc {"#{r.sql}\n#{block.call(self,r)}"})
       end
     end
@@ -45,16 +49,27 @@ module PgSpec
     alias :r :row
 
     def transaction(&block)
-      SQLTest.connection.exec("BEGIN")
+      self.class_variable_set :@@transaction, true
       yield
-      SQLTest.connection.exec("ROLLBACK")
+      self.remove_class_variable(:@@transaction)
     end
 
     def results_eq(sql, exp, desc =  nil)
+      transaction = true if self.class_variable_defined? :@@transaction
+      cl = caller_locations(1,1).first
+      loc = Pathname.new(cl.absolute_path).relative_path_from(SQLTest.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, sql)
-        self.regress<<sql
-        assert(r.test_result(exp), proc {"#{r.sql}\n#{diff exp, r.eall}"})
+        r.log("--#{loc}")
+        r.log("-- #{desc}") if desc
+        r.execute "BEGIN" if transaction
+        begin
+          assert(r.test_result(exp), proc {"#{r.sql}\n#{diff exp, r.eall}"})
+        rescue Exception => e
+          raise e
+        ensure
+          r.execute "ROLLBACK" if transaction
+        end
       end
     end
 

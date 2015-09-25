@@ -1,12 +1,10 @@
 module PgSpec
   class SQLTest
-
     class << self
-      def connection
-        @@con
+      def root
+        @@root
       end
     end
-
     def initialize(sql, a, b=nil)
       @sql, @a, @b = sql, a, b
     end
@@ -40,18 +38,23 @@ module PgSpec
       exp == eall
     end
 
-    private
-
-    def connection
-      @@con
+    def log(msg)
+      File.open(@@logdir.join(@@logfile_name), 'a'){|f| f.puts msg}
     end
 
+    def execute(sql)
+      log("#{sql};")
+      @@con.exec(sql)
+    end
+
+    private
+
     def get_first(sql)
-      connection.exec(sql).first.values.first
+      execute(sql).first.values.first
     end
 
     def get_all(sql)
-      connection.exec(sql).map(&:values)
+      execute(sql).map(&:values)
     end
   end
 end

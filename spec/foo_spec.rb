@@ -29,9 +29,6 @@ describe 'compare' do
       CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
       SELECT * FROM foo;
     SQL
-
-    results_eq sql, values(r(1),r(2),r(5)), "should report output"
+    results_eq sql, values(r(1),r(2),r(3))
   end
-
-  is '5', '5', '5 should be 5'
 end
