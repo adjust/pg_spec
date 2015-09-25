@@ -1,12 +1,46 @@
-require "pg_spec/version"
+require 'active_record'
 
-module PgSpec
-  autoload :SQLTest, 'pg_spec/sql_test'
+class Minitest::Test
+  class SQLRunner
 
-  def self.included(base)
-    base.extend(ClassMethods)
+    def initialize(sql, a, b=nil)
+      @sql, @a, @b = sql, a, b
+    end
+
+    def ea
+      @ea ||= get_first("SELECT #{@a}")
+    end
+
+    def eb
+      @eb ||= get_first("SELECT #{@b}")
+    end
+
+    def sql
+      @sql
+    end
+
+    def msg(&block)
+      proc {"#{sql}\n#{block.call(self)}"}
+    end
+
+
+    def test(exp)
+      exp == get_first(sql)
+    end
+
+    def test_result(exp)
+      exp == get_all(sql)
+    end
+
+    private
+    def get_first(sql)
+      ActiveRecord::Base.connection.execute(sql).first.values.first
+    end
+
+    def get_all(sql)
+      ActiveRecord::Base.connection.execute(sql).map(&:values)
+    end
   end
-
 
   def initialize(*args)
     @regress = []
@@ -17,10 +51,10 @@ module PgSpec
     @regress
   end
 
-  module ClassMethods
+  class << self
     def sql_true(sql, a, b = nil, desc = nil,  &block)
       it desc do
-        r = SQLTest.new(sql, a, b)
+        r = SQLRunner.new(sql, a, b)
         self.regress<<sql
         assert(r.test('t'), proc {"#{r.sql}\n#{block.call(self,r)}"})
       end
@@ -28,7 +62,7 @@ module PgSpec
 
     def sql_cmp_out(sql, a, b = nil, desc = nil,  &block)
       it desc do
-        r = SQLTest.new(sql, a, b)
+        r = SQLRunner.new(sql, a, b)
         self.regress<<sql
         assert(r.test(b), proc {"#{r.sql}\n#{block.call(self,r)}"})
       end
@@ -46,7 +80,7 @@ module PgSpec
 
     def results_eq(sql, exp, desc =  nil)
       it desc do
-        r = SQLTest.new(sql, sql)
+        r = SQLRunner.new(sql, sql)
         self.regress<<sql
         assert(r.test_result(exp), proc {"#{r.sql}\n"})
       end
@@ -93,6 +127,7 @@ module PgSpec
         "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
       end
     end
+
 
     def ok a, desc=nil
       sql_true("SELECT #{a}", a, nil, desc) do |a,r|

@@ -3,23 +3,26 @@ require "minitest/pg_spec"
 require "spec_helper"
 
 describe 'compare' do
+  include PgSpec
 
-  cmp '5','>','6', "greater than"
+  cmp '5','>','4', "greater than"
   cmp '5 + 5','<','11'
-  output '5+5', '10'
-  # is '5', '4', '5 should be 4'
-  # isnt '5', '5', '5 should not be 5'
-  # matches "'this'", "'^that'", 'this should not math that'
-  # imatches "'this'", "'^that'"
-  # ok %q{5 + 5 = 10}
-  # isa( '5', "'bigint'")
-  # cmp 7,'>', 6, "greater than"
+  output '5 + 5', '10'
+  # results_eq ("SELECT i FROM generate_series(1,3) i", %w(1,2,3))
+  results_eq "SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j",
+              values(
+                     r(1,1),
+                     r(1,2),
+                     r(2,1),
+                     r(2,2)
+                     )
 
-
-  # ok '5 > 4'
-  # ok '5 > 6'
-
-
-
+  is '5', '5', '5 should be 5'
+  isnt '5', '4', '5 should not be 4'
+  matches "'this is awesome'", "'^this'", 'this is awsome should match this'
+  imatches "'THIS is great'", "'^this'"
+  ok %q{5 + 5 = 10}
+  ok '5 > 4'
+  isa( '5', "'int'")
 
 end

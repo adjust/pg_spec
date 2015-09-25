@@ -1,110 +1,143 @@
 require 'active_record'
 
-class Minitest::Test
-  class SQLRunner
-
-    def initialize(sql, a, b=nil)
-      @sql, @a, @b = sql, a, b
+module Minitest
+  module PgSpec
+    def self.included(base)
+      base.extend(ClassMethods)
     end
 
-    def ea
-      @ea ||= get_first("SELECT #{@a}")
-    end
+    class SQLRunner
 
-    def eb
-      @eb ||= get_first("SELECT #{@b}")
-    end
+      def initialize(sql, a, b=nil)
+        @sql, @a, @b = sql, a, b
+      end
 
-    def sql
-      @sql
-    end
+      def ea
+        @ea ||= get_first("SELECT #{@a}")
+      end
 
-    def msg(&block)
-      proc {"#{sql}\n#{block.call(self)}"}
-    end
+      def eb
+        @eb ||= get_first("SELECT #{@b}")
+      end
+
+      def sql
+        @sql
+      end
+
+      def msg(&block)
+        proc {"#{sql}\n#{block.call(self)}"}
+      end
 
 
-    def test
-      "t" == get_first(sql)
-    end
+      def test(exp)
+        exp == get_first(sql)
+      end
 
-    def run
-      this = self
-       Minitest::Spec.it do
-        assert(this.test, this.msg )
-       end
-    end
+      def test_result(exp)
+        exp == get_all(sql)
+      end
 
-    private
-    def get_first(sql)
-      ActiveRecord::Base.connection.execute(sql).first.values.first
-    end
-  end
+      private
+      def get_first(sql)
+        ActiveRecord::Base.connection.execute(sql).first.values.first
+      end
 
-  def initialize(*args)
-    @regress = []
-    super
-  end
-
-  def regress
-    @regress
-  end
-
-  class << self
-    def sql_test(sql, a, b=nil, desc = nil,  &block)
-      it desc do
-        r = SQLRunner.new(sql, a, b)
-        self.regress<<sql
-        assert(r.test, proc {"#{r.sql}\n#{block.call(self,r)}"})
+      def get_all(sql)
+        ActiveRecord::Base.connection.execute(sql).map(&:values)
       end
     end
 
-    def cmp a, op, b, desc = nil
-      sql_test "SELECT #{a} #{op} #{b}", a, b, desc do |a,r|
-        "Expected #{r.ea} to be #{op} #{r.eb}"
-      end
+    def initialize(*args)
+      @regress = []
+      super
     end
 
-    def is a, b, desc = nil
-      sql_test("SELECT #{a} = #{b}", a, b, desc) do |a,r|
-        a.diff r.eb, r.ea
-      end
+    def regress
+      @regress
     end
 
-    def isnt a, b, desc = nil
-      sql_test("SELECT #{a} <> #{b}", a, b, desc) do |a,r|
-        "Expected #{r.ea} to <> #{r.eb}"
+    module ClassMethods
+      def sql_true(sql, a, b = nil, desc = nil,  &block)
+        it desc do
+          r = SQLRunner.new(sql, a, b)
+          self.regress<<sql
+          assert(r.test('t'), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        end
       end
-    end
 
-    def output(a, b, desc = nil)
-      sql_test("SELECT #{a}", a, b, desc) do |a,r|
-        "Expected #{r.ea} to output #{b}\n#{a.diff r.ea, b}"
+      def sql_cmp_out(sql, a, b = nil, desc = nil,  &block)
+        it desc do
+          r = SQLRunner.new(sql, a, b)
+          self.regress<<sql
+          assert(r.test(b), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        end
       end
-    end
 
-    def matches a, b, desc = nil
-      sql_test("SELECT #{a} ~ #{b}", a, b, desc ) do |a,r|
-        "Expected #{r.ea} to match #{r.eb}"
+      def values(*args)
+        args
       end
-    end
 
-    def imatches a, b, desc = nil
-      sql_test("SELECT #{a} ~* #{b}", a, b) do |a,r|
-        "Expected #{r.ea} to match #{r.eb}"
+      def row(*args)
+        args.map(&:to_s)
       end
-    end
 
-    def isa a, b, desc = nil
-      sql_test("SELECT pg_typeof(#{a}) = #{b}::regtype", "pg_typeof(#{a})", "#{b}::regtype",  desc) do |a,r|
-        "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
+      alias :r :row
+
+      def results_eq(sql, exp, desc =  nil)
+        it desc do
+          r = SQLRunner.new(sql, sql)
+          self.regress<<sql
+          assert(r.test_result(exp), proc {"#{r.sql}\n"})
+        end
       end
-    end
+
+      def cmp a, op, b, desc = nil
+        sql_true "SELECT #{a} #{op} #{b}", a, b, desc do |a,r|
+          "Expected #{r.ea} to be #{op} #{r.eb}"
+        end
+      end
+
+      def is a, b, desc = nil
+        sql_true("SELECT #{a} = #{b}", a, b, desc) do |a,r|
+          a.diff r.eb, r.ea
+        end
+      end
+
+      def isnt a, b, desc = nil
+        sql_true("SELECT #{a} <> #{b}", a, b, desc) do |a,r|
+          "Expected #{r.ea} to <> #{r.eb}"
+        end
+      end
+
+      def output(a, b, desc = nil)
+        sql_cmp_out("SELECT #{a}", a, b, desc) do |a,r|
+          "Expected #{r.ea} to output #{b}\n#{a.diff r.ea, b}"
+        end
+      end
+
+      def matches a, b, desc = nil
+        sql_true("SELECT #{a} ~ #{b}", a, b, desc ) do |a,r|
+          "Expected #{r.ea} to match #{r.eb}"
+        end
+      end
+
+      def imatches a, b, desc = nil
+        sql_true("SELECT #{a} ~* #{b}", a, b) do |a,r|
+          "Expected #{r.ea} to match #{r.eb}"
+        end
+      end
+
+      def isa a, b, desc = nil
+        sql_true("SELECT pg_typeof(#{a}) = #{b}::regtype", "pg_typeof(#{a})", "#{b}::regtype",  desc) do |a,r|
+          "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
+        end
+      end
 
 
-    def ok a, desc=nil
-      sql_test("SELECT #{a}", a, nil, desc) do |a,r|
-        a.diff 't', r.ea
+      def ok a, desc=nil
+        sql_true("SELECT #{a}", a, nil, desc) do |a,r|
+          a.diff 't', r.ea
+        end
       end
     end
   end
