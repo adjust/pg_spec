@@ -1,6 +1,11 @@
-require 'active_record'
 module PgSpec
   class SQLTest
+
+    class << self
+      def connection
+        @@con
+      end
+    end
 
     def initialize(sql, a, b=nil)
       @sql, @a, @b = sql, a, b
@@ -12,6 +17,10 @@ module PgSpec
 
     def eb
       @eb ||= get_first("SELECT #{@b}")
+    end
+
+    def eall
+      @all ||= get_all(sql)
     end
 
     def sql
@@ -28,16 +37,21 @@ module PgSpec
     end
 
     def test_result(exp)
-      exp == get_all(sql)
+      exp == eall
     end
 
     private
+
+    def connection
+      @@con
+    end
+
     def get_first(sql)
-      ActiveRecord::Base.connection.execute(sql).first.values.first
+      connection.exec(sql).first.values.first
     end
 
     def get_all(sql)
-      ActiveRecord::Base.connection.execute(sql).map(&:values)
+      connection.exec(sql).map(&:values)
     end
   end
 end

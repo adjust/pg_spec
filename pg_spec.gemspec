@@ -21,8 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "bundler", "~> 1.5"
   spec.add_dependency "rake"
   spec.add_dependency 'minitest', '~> 5.8.0'
-  spec.add_dependency 'minitest-reporters'
-  spec.add_dependency 'activerecord'
   spec.add_dependency 'pg', '> 0.17'
   spec.add_dependency 'pry'
 end

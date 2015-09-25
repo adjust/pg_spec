@@ -44,11 +44,17 @@ module PgSpec
 
     alias :r :row
 
+    def transaction(&block)
+      SQLTest.connection.exec("BEGIN")
+      yield
+      SQLTest.connection.exec("ROLLBACK")
+    end
+
     def results_eq(sql, exp, desc =  nil)
       it desc do
         r = SQLTest.new(sql, sql)
         self.regress<<sql
-        assert(r.test_result(exp), proc {"#{r.sql}\n"})
+        assert(r.test_result(exp), proc {"#{r.sql}\n#{diff exp, r.eall}"})
       end
     end
 
@@ -89,7 +95,7 @@ module PgSpec
     end
 
     def isa a, b, desc = nil
-      sql_true("SELECT pg_typeof(#{a}) = #{b}::regtype", "pg_typeof(#{a})", "#{b}::regtype",  desc) do |a,r|
+      sql_true("SELECT pg_typeof(#{a}) = '#{b}'::regtype", "pg_typeof(#{a})", "'#{b}'::regtype",  desc) do |a,r|
         "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
       end
     end
