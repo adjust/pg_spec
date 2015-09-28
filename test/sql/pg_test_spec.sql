@@ -714,3 +714,504 @@ ROLLBACK;
 --spec/pg_spec_spec.rb:36
 -- 5 should be 5
 SELECT 5 = 5;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:11
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+ROLLBACK;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:20
+-- 5 should not be 4
+SELECT 5 <> 4;
+--spec/pg_spec_spec.rb:8
+SELECT 5 + 5 < 11;
+--spec/pg_spec_spec.rb:24
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:19
+-- 5 should be 5
+SELECT 5 = 5;
+--spec/pg_spec_spec.rb:36
+-- 5 should be 5
+SELECT 5 = 5;
+SELECT 5 + 5;
+--spec/pg_spec_spec.rb:22
+SELECT 'THIS is great' ~* '^this';
+--spec/pg_spec_spec.rb:25
+SELECT pg_typeof(5) = 'int'::regtype;
+--spec/pg_spec_spec.rb:11
+SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j;
+--spec/pg_spec_spec.rb:21
+-- this is awsome should match this
+SELECT 'this is awesome' ~ '^this';
+--spec/pg_spec_spec.rb:7
+-- greater than
+SELECT 5 > 4;
+--spec/pg_spec_spec.rb:33
+-- should report output
+BEGIN;
+      CREATE TABLE foo AS SELECT i FROM generate_series(1,3) i;
+      SELECT * FROM foo;
+;
+ROLLBACK;
+--spec/pg_spec_spec.rb:23
+SELECT 5 + 5 = 10;

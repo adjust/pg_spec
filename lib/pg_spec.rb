@@ -1,4 +1,5 @@
-require "pg_spec/version"
+require 'pg_spec/version'
+require 'pg_spec/configuration'
 
 module PgSpec
   autoload :SQLTest, 'pg_spec/sql_test'
@@ -19,7 +20,7 @@ module PgSpec
     def sql_true(sql, a, b = nil, desc = nil,  &block)
       transaction = true if self.class_variable_defined? :@@transaction
       cl = caller_locations(2,1).first
-      loc = Pathname.new(cl.absolute_path).relative_path_from(SQLTest.root).to_s+":#{cl.lineno}"
+      loc = Pathname.new(cl.absolute_path).relative_path_from(PgSpec.configuration.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, a, b)
         r.log("--#{loc}")
@@ -57,7 +58,7 @@ module PgSpec
     def results_eq(sql, exp, desc =  nil)
       transaction = true if self.class_variable_defined? :@@transaction
       cl = caller_locations(1,1).first
-      loc = Pathname.new(cl.absolute_path).relative_path_from(SQLTest.root).to_s+":#{cl.lineno}"
+      loc = Pathname.new(cl.absolute_path).relative_path_from(PgSpec.configuration.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, sql)
         r.log("--#{loc}")

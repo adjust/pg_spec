@@ -30,7 +30,7 @@ describe 'compare' do
       SELECT * FROM foo;
     SQL
 
-    results_eq sql, values(r(1),r(2),r(5)), "should report output"
+    results_eq sql, values(r(1),r(2),r(3)), "should report output"
   end
 
   is '5', '5', '5 should be 5'

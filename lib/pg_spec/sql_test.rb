@@ -1,10 +1,9 @@
+require 'minitest/assertions'
+
 module PgSpec
   class SQLTest
-    class << self
-      def root
-        @@root
-      end
-    end
+    include Minitest::Assertions
+
     def initialize(sql, a, b=nil)
       @sql, @a, @b = sql, a, b
     end
@@ -29,7 +28,6 @@ module PgSpec
       proc {"#{sql}\n#{block.call(self)}"}
     end
 
-
     def test(exp)
       exp == get_first(sql)
     end
@@ -39,12 +37,12 @@ module PgSpec
     end
 
     def log(msg)
-      File.open(@@logdir.join(@@logfile_name), 'a'){|f| f.puts msg}
+      File.open(PgSpec.configuration.logdir.join(@@logfile_name), 'a'){|f| f.puts msg}
     end
 
     def execute(sql)
       log("#{sql};")
-      @@con.exec(sql)
+      PgSpec.configuration.con.exec(sql)
     end
 
     private
