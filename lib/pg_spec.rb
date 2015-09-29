@@ -3,39 +3,55 @@ require 'pg_spec/configuration'
 
 module PgSpec
   autoload :SQLTest, 'pg_spec/sql_test'
+  autoload :Log, 'pg_spec/log'
+  autoload :Row, 'pg_spec/row'
+  autoload :Header, 'pg_spec/header'
 
   def self.included(base)
-    cl = caller_locations(1,1).first
-    p = Pathname.new cl.path
-    base.class_variable_set :@@logfile_name, p.basename.sub_ext('.sql').sub('_spec','_test')
     base.extend(ClassMethods)
-  end
+    PgSpec.configuration.before_all
 
-  def before_setup
-    SQLTest.class_variable_set :@@logfile_name, self.class.class_variable_get(:@@logfile_name)
-  end
+    def before_setup
+      PgSpec.configuration.before_each
+    end
 
+    def after_teardown
+      PgSpec.configuration.after_each
+    end
+  end
 
   module ClassMethods
     def sql_true(sql, a, b = nil, desc = nil,  &block)
       transaction = true if self.class_variable_defined? :@@transaction
       cl = caller_locations(2,1).first
-      loc = Pathname.new(cl.absolute_path).relative_path_from(PgSpec.configuration.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, a, b)
-        r.log("--#{loc}")
-        r.log("-- #{desc}") if desc
         r.execute "BEGIN" if transaction
-        assert(r.test('t'), proc {"#{r.sql}\n#{block.call(self,r)}"})
-        r.execute "ROLLBACK" if transaction
+        begin
+          assert(r.test('t'), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        rescue Exception => e
+          raise e
+        ensure
+          r.execute "ROLLBACK" if transaction
+          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+        end
       end
     end
 
     def sql_cmp_out(sql, a, b = nil, desc = nil,  &block)
+      transaction = true if self.class_variable_defined? :@@transaction
+      cl = caller_locations(2,1).first
       it desc do
         r = SQLTest.new(sql, a, b)
-        r.log("-- #{desc}") if desc
-        assert(r.test(b), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        r.execute "BEGIN" if transaction
+        begin
+          assert(r.test(b), proc {"#{r.sql}\n#{block.call(self,r)}"})
+        rescue Exception => e
+          raise e
+        ensure
+          r.execute "ROLLBACK" if transaction
+          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+        end
       end
     end
 
@@ -44,10 +60,16 @@ module PgSpec
     end
 
     def row(*args)
-      args.map(&:to_s)
+      Row.new args.map(&:to_s)
     end
 
     alias :r :row
+
+    def header(*args)
+      Header.new args.map(&:to_s)
+    end
+
+    alias :h :header
 
     def transaction(&block)
       self.class_variable_set :@@transaction, true
@@ -58,67 +80,72 @@ module PgSpec
     def results_eq(sql, exp, desc =  nil)
       transaction = true if self.class_variable_defined? :@@transaction
       cl = caller_locations(1,1).first
-      loc = Pathname.new(cl.absolute_path).relative_path_from(PgSpec.configuration.root).to_s+":#{cl.lineno}"
       it desc do
         r = SQLTest.new(sql, sql)
-        r.log("--#{loc}")
-        r.log("-- #{desc}") if desc
         r.execute "BEGIN" if transaction
         begin
-          assert(r.test_result(exp), proc {"#{r.sql}\n#{diff exp, r.eall}"})
+          assert(r.test_result(exp), proc {"#{r.sql}\n#{diff exp, r.sql_all}"})
         rescue Exception => e
           raise e
         ensure
           r.execute "ROLLBACK" if transaction
+          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
         end
       end
     end
 
     def cmp a, op, b, desc = nil
-      sql_true "SELECT #{a} #{op} #{b}", a, b, desc do |a,r|
-        "Expected #{r.ea} to be #{op} #{r.eb}"
+      desc ||= "#{a} should #{op} #{b}"
+      sql_true "SELECT #{a} #{op} #{b}", a, b, desc do |s,r|
+        "Expected #{r.sql_a} to be #{op} #{r.sql_b}"
       end
     end
 
     def is a, b, desc = nil
-      sql_true("SELECT #{a} = #{b}", a, b, desc) do |a,r|
-        a.diff r.eb, r.ea
+      desc ||= "#{a} should = #{b}"
+      sql_true("SELECT #{a} = #{b}", a, b, desc) do |s,r|
+        s.diff r.sql_b, r.sql_a
       end
     end
 
     def isnt a, b, desc = nil
-      sql_true("SELECT #{a} <> #{b}", a, b, desc) do |a,r|
-        "Expected #{r.ea} to <> #{r.eb}"
+      desc ||= "#{a} should <> #{b}"
+      sql_true("SELECT #{a} <> #{b}", a, b, desc) do |s,r|
+        "Expected #{r.sql_a} to <> #{r.sql_b}"
       end
     end
 
     def output(a, b, desc = nil)
-      sql_cmp_out("SELECT #{a}", a, b, desc) do |a,r|
-        "Expected #{r.ea} to output #{b}\n#{a.diff r.ea, b}"
+      sql_cmp_out("SELECT #{a}", a, b, desc) do |s,r|
+        "Expected #{r.sql_a} to output #{b}\n#{s.diff r.sql_a, b}"
       end
     end
 
     def matches a, b, desc = nil
-      sql_true("SELECT #{a} ~ #{b}", a, b, desc ) do |a,r|
-        "Expected #{r.ea} to match #{r.eb}"
+      desc ||= "#{a} should match #{b}"
+      sql_true("SELECT #{a} ~ #{b}", a, b, desc ) do |s,r|
+        "Expected #{r.sql_a} to match #{r.sql_b}"
       end
     end
 
     def imatches a, b, desc = nil
-      sql_true("SELECT #{a} ~* #{b}", a, b) do |a,r|
-        "Expected #{r.ea} to match #{r.eb}"
+      desc ||= "#{a} should match #{b}"
+      sql_true("SELECT #{a} ~* #{b}", a, b, desc) do |s,r|
+        "Expected #{r.sql_a} to match #{r.sql_b}"
       end
     end
 
     def isa a, b, desc = nil
-      sql_true("SELECT pg_typeof(#{a}) = '#{b}'::regtype", "pg_typeof(#{a})", "'#{b}'::regtype",  desc) do |a,r|
-        "Expected #{a} to be of type #{b}\n #{a.diff r.eb, r.ea}"
+      desc ||= "#{a} should be of type #{b}"
+      sql_true("SELECT pg_typeof(#{a}) = '#{b}'::regtype", "pg_typeof(#{a})", "'#{b}'::regtype",  desc) do |s,r|
+        "Expected #{a} to be of type #{b}\n #{s.diff r.sql_b, r.sql_a}"
       end
     end
 
     def ok a, desc=nil
-      sql_true("SELECT #{a}", a, nil, desc) do |a,r|
-        a.diff 't', r.ea
+      desc ||= "#{a} should be true"
+      sql_true("SELECT #{a}", a, nil, desc) do |s,r|
+        s.diff 't', r.sql_a
       end
     end
   end

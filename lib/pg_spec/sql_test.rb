@@ -2,57 +2,59 @@ require 'minitest/assertions'
 
 module PgSpec
   class SQLTest
+    attr_accessor :sql
     include Minitest::Assertions
 
     def initialize(sql, a, b=nil)
       @sql, @a, @b = sql, a, b
+      @result = {}
     end
 
-    def ea
-      @ea ||= get_first("SELECT #{@a}")
+    def sql_a
+      @sql_a ||= get_first("SELECT #{@a}")
     end
 
-    def eb
-      @eb ||= get_first("SELECT #{@b}")
+    def sql_b
+      @sql_b ||= get_first("SELECT #{@b}")
     end
 
-    def eall
-      @all ||= get_all(sql)
+    def sql_all
+      @sql_all ||= get_all(sql)
     end
 
-    def sql
-      @sql
-    end
-
-    def msg(&block)
-      proc {"#{sql}\n#{block.call(self)}"}
-    end
 
     def test(exp)
-      exp == get_first(sql)
+      @test ||= exp == get_first(sql)
     end
 
     def test_result(exp)
-      exp == eall
-    end
-
-    def log(msg)
-      File.open(PgSpec.configuration.logdir.join(@@logfile_name), 'a'){|f| f.puts msg}
+      if exp.first.is_a?(Header)
+        @test ||= exp == sql_all.unshift(fields(sql))
+      else
+        @test ||= exp == sql_all
+      end
     end
 
     def execute(sql)
-      log("#{sql};")
       PgSpec.configuration.con.exec(sql)
     end
 
     private
 
+    def fields(sql)
+      result(sql).fields
+    end
+
+    def result(sql)
+      @result[sql] ||= execute(sql)
+    end
+
     def get_first(sql)
-      execute(sql).first.values.first
+      result(sql).first.values.first
     end
 
     def get_all(sql)
-      execute(sql).map(&:values)
+      result(sql).map(&:values)
     end
   end
 end

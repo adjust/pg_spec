@@ -10,10 +10,11 @@ describe 'compare' do
   # results_eq ("SELECT i FROM generate_series(1,3) i", %w(1,2,3))
   results_eq "SELECT i,j FROM generate_series(1,2) i, generate_series(1,2) j",
               values(
+                     h('i','j'),
                      r(1,1),
                      r(1,2),
                      r(2,1),
-                     r(2,2)
+                     r(2,2),
                      )
 
   is '5', '5', '5 should be 5'
