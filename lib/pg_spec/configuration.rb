@@ -1,3 +1,4 @@
+require "minitest"
 module PgSpec
   class Configuration
     attr_accessor :options,:after_clb, :before_clb
@@ -66,8 +67,7 @@ module PgSpec
     yield(configuration)
     configuration.before_suite
     configuration.after_clb[:suite].each do |block|
-      MiniTest::Unit.after_tests(&block)
+      Minitest.after_run(&block)
     end
   end
-
 end

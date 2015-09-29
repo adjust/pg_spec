@@ -1,3 +1,5 @@
+require 'pry'
+require 'pg'
 require 'pg_spec/version'
 require 'pg_spec/configuration'
 
@@ -33,7 +35,9 @@ module PgSpec
           raise e
         ensure
           r.execute "ROLLBACK" if transaction
-          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          if PgSpec.configuration.log
+            Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          end
         end
       end
     end
@@ -50,7 +54,9 @@ module PgSpec
           raise e
         ensure
           r.execute "ROLLBACK" if transaction
-          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          if PgSpec.configuration.log
+            Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          end
         end
       end
     end
@@ -89,7 +95,34 @@ module PgSpec
           raise e
         ensure
           r.execute "ROLLBACK" if transaction
-          Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          if PgSpec.configuration.log
+            Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          end
+        end
+      end
+    end
+
+    def throws(sql, exp, desc =  nil)
+      desc ||= "should throw error #{exp}"
+      transaction = true if self.class_variable_defined? :@@transaction
+      cl = caller_locations(1,1).first
+      it desc do
+        r = SQLTest.new(sql, sql)
+        r.execute "BEGIN" if transaction
+        begin
+          r.sql_all
+        rescue PGError => e
+          msg = e.message[/ERROR:  (.*?)$/,1]
+
+          assert_equal(exp,msg, proc {"#{r.sql}\nExpected error"}) if String === exp
+          assert_match(exp,msg, proc {"#{r.sql}\nExpected error"}) if Regexp === exp
+        rescue Exception => e
+          raise e
+        ensure
+          r.execute "ROLLBACK" if transaction
+          if PgSpec.configuration.log
+            Log.new(sql, desc, cl, transaction, e).write(PgSpec.configuration.log)
+          end
         end
       end
     end

@@ -35,4 +35,7 @@ describe 'compare' do
   end
 
   is '5', '5', '5 should be 5'
+
+  throws 'foo', 'syntax error at or near "foo"'
+  throws 'foo', /foo/
 end

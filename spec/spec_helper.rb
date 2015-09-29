@@ -1,6 +1,4 @@
-require 'rubygems'
 require 'pg_spec'
-require 'pg'
 
 PgSpec.configure do |c|
   c.logdir =  Pathname.new File.expand_path('../../test/sql', __FILE__)
